@@ -11,6 +11,11 @@ on:
         description: '请输入要编译固件大小 单位(MB)'
         required: true
         default: '1024'
+      enable_store:
+        description: "集成 store 商店"
+        required: false
+        type: boolean
+        default: true
       include_docker:
         description: |
           是否编译 Docker 插件
@@ -62,6 +67,15 @@ jobs:
               exit 1
             fi
           fi
+      
+      - name: Enable Store integration
+        run: |
+          if [ "${{ github.event.inputs.enable_store }}" == "true" ]; then
+            echo 'CUSTOM_PACKAGES="$CUSTOM_PACKAGES luci-app-store"' >> shell/custom-packages.sh
+            echo "✅ 已追加 luci-app-store"
+          else
+            echo "❎ 未启用 luci-app-store"
+          fi
 
       - name: Build ImmortalWrt-x86-64-efi
         run: |
@@ -93,7 +107,10 @@ jobs:
         run: |
           cat > ${{ github.workspace }}/router-info.md <<EOF
           ## 📡 路由器后台信息
-
+          <a href="https://wkdaily.cpolar.cn/archives/1">
+           <img src="https://img.shields.io/badge/若下载慢可套用国内加速站下载-FC7C0D?logo=github&logoColor=fff&labelColor=000&style=for-the-badge"/>
+          </a>
+          
           - 🏠 **后台地址**: ${{ github.event.inputs.custom_router_ip }}
           - 👤 **用户名**: root
           - 🔑 **密码**: 无
